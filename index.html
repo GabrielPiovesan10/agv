@@ -7,7 +7,387 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="agendaa.css">
+    <style>
+        :root {
+            --primary: #8b5cf6; /* Vibrant purple for admin vibe */
+            --primary-hover: #7c3aed;
+            --bg-dark: #09090b; /* Very dark zinc */
+            --bg-card: rgba(24, 24, 27, 0.7);
+            --bg-card-hover: rgba(39, 39, 42, 0.8);
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --error: #ef4444;
+            --success: #10b981;
+            --glow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1300px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .highlight {
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        /* Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphism Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--primary);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Messages */
+        .message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.hidden {
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Event List */
+        .list-section {
+            display: flex;
+            flex-direction: column;
+            max-height: 850px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-btn.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .events-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        /* Custom Scrollbar */
+        .events-container::-webkit-scrollbar { width: 6px; }
+        .events-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
+        .events-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .events-container::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .event-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(139, 92, 246, 0.4);
+            background: var(--bg-card-hover);
+        }
+
+        .event-card.past-event {
+            opacity: 0.6;
+        }
+        .event-card.past-event:hover {
+            opacity: 0.9;
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .event-card.past-event::before {
+            background: var(--text-muted);
+        }
+
+        .event-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .event-datetime {
+            font-size: 0.85rem;
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-weight: 500;
+        }
+
+        .past-event .event-datetime {
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .event-finances {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .finance-item span {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .event-notes {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            color: #cbd5e1;
+            border-left: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .delete-btn {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid transparent;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--error);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
 </head>
 <body>
     <div class="dashboard">
@@ -83,6 +463,181 @@
         </main>
     </div>
     
-    <script src="agendaa.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ---- DOM Elements ----
+            const form = document.getElementById('event-form');
+            const formMessage = document.getElementById('form-message');
+            const eventsList = document.getElementById('events-list');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // ---- State ----
+            // Array of event objects
+            let adminEvents = JSON.parse(localStorage.getItem('adminEventsAgenda')) || [];
+            let currentFilter = 'upcoming'; // 'upcoming', 'past', 'all'
+
+            // Get today at 00:00:00 for comparison
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const todayStr = today.toISOString().split('T')[0];
+
+            // ---- Handlers ----
+            
+            // Form Submit
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Get values
+                const eventName = document.getElementById('eventName').value.trim();
+                const eventDate = document.getElementById('eventDate').value;
+                const eventTime = document.getElementById('eventTime').value;
+                const couvert = document.getElementById('couvert').value;
+                const cache = document.getElementById('cache').value;
+                const notes = document.getElementById('notes').value.trim();
+
+                if (!eventName || !eventDate || !eventTime) {
+                    showMessage('Preencha os campos obrigatórios (Nome, Data, Horário).', 'error');
+                    return;
+                }
+
+                // Create event object
+                const newEvent = {
+                    id: Date.now().toString(),
+                    name: eventName,
+                    date: eventDate,
+                    time: eventTime,
+                    couvert: couvert ? parseFloat(couvert).toFixed(2) : '0.00',
+                    cache: cache ? parseFloat(cache).toFixed(2) : '0.00',
+                    notes: notes,
+                    createdAt: new Date().toISOString()
+                };
+
+                // Save
+                adminEvents.push(newEvent);
+                saveEvents();
+                
+                // Update UI
+                renderEvents();
+                showMessage('Evento agendado com sucesso! 🎉', 'success');
+                
+                // Reset form
+                form.reset();
+                document.getElementById('eventName').focus();
+            });
+
+            // Filters
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderEvents();
+                });
+            });
+
+            // ---- Functions ----
+            
+            function saveEvents() {
+                // Sort by date and time (ascending) before saving
+                adminEvents.sort((a, b) => {
+                    const dateA = new Date(`${a.date}T${a.time}`);
+                    const dateB = new Date(`${b.date}T${b.time}`);
+                    return dateA - dateB;
+                });
+                localStorage.setItem('adminEventsAgenda', JSON.stringify(adminEvents));
+            }
+
+            function renderEvents() {
+                eventsList.innerHTML = '';
+                
+                // Get today string in YYYY-MM-DD local time format
+                const localToday = new Date();
+                const yyyy = localToday.getFullYear();
+                const mm = String(localToday.getMonth() + 1).padStart(2, '0');
+                const dd = String(localToday.getDate()).padStart(2, '0');
+                const formattedToday = `${yyyy}-${mm}-${dd}`;
+
+                let filtered = adminEvents;
+                
+                if (currentFilter === 'upcoming') {
+                    filtered = adminEvents.filter(e => e.date >= formattedToday);
+                } else if (currentFilter === 'past') {
+                    filtered = adminEvents.filter(e => e.date < formattedToday);
+                    // Reverse to show most recent past events first
+                    filtered = [...filtered].reverse();
+                } else {
+                    // all
+                    filtered = [...adminEvents].reverse(); // newest first
+                }
+
+                if (filtered.length === 0) {
+                    eventsList.innerHTML = `
+                        <div class="empty-state slide-in">
+                            <p>Nenhum evento encontrado nesta categoria.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                filtered.forEach((ev, index) => {
+                    // Format date for BR format
+                    const [y, m, d] = ev.date.split('-');
+                    const formattedDateBR = `${d}/${m}/${y}`;
+                    
+                    const isPast = ev.date < formattedToday;
+                    
+                    const card = document.createElement('div');
+                    card.className = `event-card slide-in ${isPast ? 'past-event' : ''}`;
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    
+                    card.innerHTML = `
+                        <div class="event-header-info">
+                            <h3 class="event-title">${ev.name}</h3>
+                            <div class="event-datetime">
+                                🗓️ ${formattedDateBR} às ${ev.time}
+                            </div>
+                        </div>
+                        
+                        <div class="event-finances">
+                            <div class="finance-item">
+                                🎫 Couvert: <span>R$ ${ev.couvert}</span>
+                            </div>
+                            <div class="finance-item">
+                                💰 Cachê: <span>R$ ${ev.cache}</span>
+                            </div>
+                        </div>
+
+                        ${ev.notes ? `<div class="event-notes">${ev.notes}</div>` : ''}
+                        
+                        <button class="delete-btn" onclick="deleteEvent('${ev.id}')">Excluir</button>
+                    `;
+                    
+                    eventsList.appendChild(card);
+                });
+            }
+
+            function showMessage(text, type) {
+                formMessage.textContent = text;
+                formMessage.className = `message ${type}`;
+                formMessage.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    formMessage.classList.add('hidden');
+                }, 4000);
+            }
+
+            // Expose delete function
+            window.deleteEvent = function(id) {
+                if(confirm('Tem certeza que deseja excluir este evento da agenda? Essa ação não pode ser desfeita.')) {
+                    adminEvents = adminEvents.filter(e => e.id !== id);
+                    saveEvents();
+                    renderEvents();
+                }
+            };
+
+            // Initial render
+            renderEvents();
+        });
+    </script>
 </body>
 </html>
