@@ -445,9 +445,31 @@
                 </form>
             </section>
 
-            <!-- Lista de Eventos -->
-            <section class="card glass list-section">
-                <div class="card-header">
+            <div class="right-column" style="display: flex; flex-direction: column; gap: 2rem; overflow: hidden;">
+                <!-- Calendario -->
+                <section class="card glass calendar-section" style="padding: 1.5rem;">
+                    <div class="calendar-header">
+                        <button type="button" class="calendar-nav-btn" id="prev-month">❮</button>
+                        <h3 id="calendar-month-year">Mês Ano</h3>
+                        <button type="button" class="calendar-nav-btn" id="next-month">❯</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-name">Dom</div>
+                        <div class="calendar-day-name">Seg</div>
+                        <div class="calendar-day-name">Ter</div>
+                        <div class="calendar-day-name">Qua</div>
+                        <div class="calendar-day-name">Qui</div>
+                        <div class="calendar-day-name">Sex</div>
+                        <div class="calendar-day-name">Sáb</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-days">
+                        <!-- Days will be generated here -->
+                    </div>
+                </section>
+
+                <!-- Lista de Eventos -->
+                <section class="card glass list-section">
+                    <div class="card-header">
                     <h2>📋 Agenda de Eventos</h2>
                     <div class="filters">
                         <button class="filter-btn active" data-filter="upcoming">Próximos</button>
@@ -460,6 +482,7 @@
                     <!-- Cards de eventos renderizados via JS -->
                 </div>
             </section>
+            </div>
         </main>
     </div>
     
@@ -467,6 +490,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             // ---- DOM Elements ----
             const form = document.getElementById('event-form');
+            const calendarDays = document.getElementById('calendar-days');
+            const calendarMonthYear = document.getElementById('calendar-month-year');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
             const formMessage = document.getElementById('form-message');
             const eventsList = document.getElementById('events-list');
             const filterBtns = document.querySelectorAll('.filter-btn');
@@ -474,7 +501,10 @@
             // ---- State ----
             // Array of event objects
             let adminEvents = JSON.parse(localStorage.getItem('adminEventsAgenda')) || [];
-            let currentFilter = 'upcoming'; // 'upcoming', 'past', 'all'
+            let currentFilter = 'upcoming'; // 'upcoming', 'past', 'all', 'calendar'
+            let selectedDateFilter = null;
+            
+            let navDate = new Date(); // Date used to navigate the calendar
 
             // Get today at 00:00:00 for comparison
             const today = new Date();
@@ -518,6 +548,7 @@
                 
                 // Update UI
                 renderEvents();
+                renderCalendar();
                 showMessage('Evento agendado com sucesso! 🎉', 'success');
                 
                 // Reset form
@@ -531,12 +562,92 @@
                     filterBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     currentFilter = btn.dataset.filter;
+                    selectedDateFilter = null; // Clear calendar filter if filter buttons are clicked
                     renderEvents();
+                    renderCalendar(); // Re-render to clear selection
                 });
             });
 
             // ---- Functions ----
             
+            // ---- Calendar Logic ----
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+            function renderCalendar() {
+                calendarDays.innerHTML = '';
+                
+                const year = navDate.getFullYear();
+                const month = navDate.getMonth();
+                
+                calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+                
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                const today = new Date();
+                
+                // Empties before month start
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'calendar-day empty';
+                    calendarDays.appendChild(emptyDiv);
+                }
+                
+                // Days
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'calendar-day';
+                    dayDiv.textContent = i;
+                    
+                    const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                    
+                    // Check if it's today
+                    if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                        dayDiv.classList.add('today');
+                    }
+                    
+                    // Check if selected
+                    if (selectedDateFilter === cellDateStr) {
+                        dayDiv.classList.add('selected');
+                    }
+                    
+                    // Check if has events
+                    const hasEvents = adminEvents.some(e => e.date === cellDateStr);
+                    if (hasEvents) {
+                        dayDiv.classList.add('has-event');
+                    }
+                    
+                    dayDiv.addEventListener('click', () => {
+                        if (selectedDateFilter === cellDateStr) {
+                            // Deselect
+                            selectedDateFilter = null;
+                            currentFilter = 'upcoming';
+                            filterBtns.forEach(b => b.classList.remove('active'));
+                            document.querySelector('.filter-btn[data-filter="upcoming"]').classList.add('active');
+                        } else {
+                            // Select
+                            selectedDateFilter = cellDateStr;
+                            currentFilter = 'calendar';
+                            filterBtns.forEach(b => b.classList.remove('active'));
+                        }
+                        renderCalendar();
+                        renderEvents();
+                    });
+                    
+                    calendarDays.appendChild(dayDiv);
+                }
+            }
+
+            prevMonthBtn.addEventListener('click', () => {
+                navDate.setMonth(navDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                navDate.setMonth(navDate.getMonth() + 1);
+                renderCalendar();
+            });
+
             function saveEvents() {
                 // Sort by date and time (ascending) before saving
                 adminEvents.sort((a, b) => {
@@ -559,7 +670,10 @@
 
                 let filtered = adminEvents;
                 
-                if (currentFilter === 'upcoming') {
+                if (currentFilter === 'calendar' && selectedDateFilter) {
+                    filtered = adminEvents.filter(e => e.date === selectedDateFilter);
+                    filtered.sort((a, b) => new Date(`1970-01-01T${a.time}`) - new Date(`1970-01-01T${b.time}`));
+                } else if (currentFilter === 'upcoming') {
                     filtered = adminEvents.filter(e => e.date >= formattedToday);
                 } else if (currentFilter === 'past') {
                     filtered = adminEvents.filter(e => e.date < formattedToday);
@@ -632,11 +746,13 @@
                     adminEvents = adminEvents.filter(e => e.id !== id);
                     saveEvents();
                     renderEvents();
+                    renderCalendar();
                 }
             };
 
             // Initial render
             renderEvents();
+            renderCalendar();
         });
     </script>
 </body>
